@@ -16,7 +16,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.resolve(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-// Inisialisasi Database (Absensi, Users, & Perusahaan)
+// Inisialisasi Database
 async function initDB() {
   try {
     const client = await pool.connect();
@@ -52,7 +52,6 @@ async function initDB() {
       )
     `);
 
-    // Masukkan data perusahaan default jika masih kosong
     const checkPerusahaan = await client.query('SELECT COUNT(*) FROM perusahaan');
     if (parseInt(checkPerusahaan.rows[0].count) === 0) {
       await client.query(`
@@ -114,7 +113,7 @@ app.get('/', async (req, res) => {
   });
 });
 
-// Halaman Login
+// Halaman Login (Satu untuk siswa dan admin)
 app.get('/login', (req, res) => {
   res.render('login', { title: 'Login - Absensi PKL', error: null });
 });
@@ -122,6 +121,7 @@ app.get('/login', (req, res) => {
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
+  // Deteksi Admin Khusus
   if (username === 'admin' && password === 'admin123') {
     return res.redirect('/admin?auth=true');
   }
@@ -171,25 +171,17 @@ app.get('/admin', async (req, res) => {
   }
 });
 
-// Update Data Perusahaan oleh Admin
+// Update Data Perusahaan oleh Admin (DIJAMIN BERUBAH)
 app.post('/admin/update-perusahaan', async (req, res) => {
   const { nama_perusahaan, alamat_perusahaan, pembimbing } = req.body;
   try {
     const client = await pool.connect();
     
-    // Cek apakah data perusahaan sudah ada
-    const check = await client.query('SELECT * FROM perusahaan LIMIT 1');
-    if (check.rows.length > 0) {
-      await client.query(
-        'UPDATE perusahaan SET nama_perusahaan = $1, alamat_perusahaan = $2, pembimbing = $3 WHERE id = $4',
-        [nama_perusahaan, alamat_perusahaan, pembimbing, check.rows.id]
-      );
-    } else {
-      await client.query(
-        'INSERT INTO perusahaan (nama_perusahaan, alamat_perusahaan, pembimbing) VALUES ($1, $2, $3)',
-        [nama_perusahaan, alamat_perusahaan, pembimbing]
-      );
-    }
+    await client.query('DELETE FROM perusahaan');
+    await client.query(
+      'INSERT INTO perusahaan (nama_perusahaan, alamat_perusahaan, pembimbing) VALUES ($1, $2, $3)',
+      [nama_perusahaan, alamat_perusahaan, pembimbing]
+    );
 
     const usersResult = await client.query('SELECT * FROM users ORDER BY id DESC');
     const persResult = await client.query('SELECT * FROM perusahaan LIMIT 1');
@@ -197,12 +189,12 @@ app.post('/admin/update-perusahaan', async (req, res) => {
 
     res.render('admin', { 
       usersList: usersResult.rows, 
-      perusahaan: persResult.rows, 
+      perusahaan: persResult.rows.length > 0 ? persResult.rows[0] : null, 
       success: 'Data perusahaan berhasil diperbarui!' 
     });
   } catch (err) {
     console.error('Update perusahaan error:', err);
-    res.status(500).send('Gagal memperbarui data perusahaan');
+    res.status(500).send(`Gagal memperbarui data perusahaan: ${err.message}`);
   }
 });
 
@@ -221,7 +213,7 @@ app.post('/admin/tambah-siswa', async (req, res) => {
 
     res.render('admin', { 
       usersList: usersResult.rows, 
-      perusahaan: persResult.rows.length > 0 ? persResult.rows : null, 
+      perusahaan: persResult.rows.length > 0 ? persResult.rows[0] : null, 
       success: 'Akun dan foto siswa berhasil ditambahkan!' 
     });
   } catch (err) {
@@ -242,7 +234,7 @@ app.post('/admin/hapus-siswa', async (req, res) => {
 
     res.render('admin', { 
       usersList: usersResult.rows, 
-      perusahaan: persResult.rows.length > 0 ? persResult.rows : null, 
+      perusahaan: persResult.rows.length > 0 ? persResult.rows[0] : null, 
       success: 'Akun siswa berhasil dihapus!' 
     });
   } catch (err) {
