@@ -1,138 +1,62 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .container { display: flex; gap: 20px; flex-wrap: wrap; }
-        .card { background: white; padding: 20px; border-radius: 8px; flex: 1; min-width: 320px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 12px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; }
-        .btn-green { background: #28a745; color: white; width: 100%; }
-        .btn-excel { background: #17a2b8; color: white; }
-        .btn-logout { background: #6c757d; color: white; margin-left: 10px; }
-        .btn-danger { background: #dc3545; color: white; padding: 4px 8px; font-size: 12px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #007bff; color: white; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        .badge { padding: 4px 8px; border-radius: 4px; color: white; font-size: 12px; font-weight: bold; }
-        .bg-Hadir { background-color: #28a745; }
-        .bg-Izin { background-color: #ffc107; color: black; }
-        .bg-Sakit { background-color: #dc3545; }
-        .img-preview { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'Absensi PKL' %></title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .container {
+      margin-top: 20px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .btn {
+      display: inline-block;
+      padding: 8px 15px;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="header">
-        <div>
-            <h2><%= title %></h2>
-            <small>Login sebagai: <strong><%= user.username %> (<%= user.role %>)</strong></small>
-        </div>
-        <div>
-            <a href="/export" class="btn btn-excel">📥 Unduh Excel (CSV)</a>
-            <a href="/logout" class="btn btn-logout">Keluar</a>
-        </div>
+  <div class="header">
+    <h2>Aplikasi Absensi PKL</h2>
+    <div>
+      <% if (typeof user !== 'undefined' && user) { %>
+        <span>Login sebagai: <strong><%= user.username %></strong> (<%= user.role %>)</span>
+      <% } else { %>
+        <a href="/login" class="btn">Login</a>
+      <% } %>
     </div>
+  </div>
 
-    <div class="container">
-        <!-- Form Input Absen -->
-        <div class="card">
-            <h3>Form Presensi</h3>
-            <form action="/absen" method="POST" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label for="nama">Nama Siswa:</label>
-                    <input type="text" id="nama" name="nama" value="<%= user.username %>" required>
-                </div>
-                <div class="form-group">
-                    <label for="status">Keterangan:</label>
-                    <select id="status" name="status">
-                        <option value="Hadir">Hadir</option>
-                        <option value="Izin">Izin</option>
-                        <option value="Sakit">Sakit</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="kegiatan">Catatan Kegiatan:</label>
-                    <textarea id="kegiatan" name="kegiatan" rows="2" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="foto">Foto Bukti / Selfie:</label>
-                    <input type="file" id="foto" name="foto" accept="image/*">
-                </div>
-                
-                <input type="hidden" id="lokasi" name="lokasi">
-                <button type="submit" class="btn btn-green">Kirim Absen</button>
-            </form>
-        </div>
+  <div class="container">
+    <h3>Selamat Datang di Sistem Absensi PKL</h3>
+    <p>Gunakan menu yang tersedia untuk mencatat dan mengunduh laporan presensi.</p>
+    
+    <br>
+    <a href="#" class="btn">📊 Unduh Excel (CSV)</a>
+  </div>
 
-        <!-- Tabel Riwayat Absen -->
-        <div class="card" style="flex: 2;">
-            <h3>Riwayat Absensi</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Foto</th>
-                        <th>Waktu</th>
-                        <th>Nama</th>
-                        <th>Status</th>
-                        <th>Kegiatan & Lokasi</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% if (dataAbsensi.length > 0) { %>
-                        <% dataAbsensi.forEach(item => { %>
-                            <tr>
-                                <td>
-                                    <% if (item.foto) { %>
-                                        <a href="/uploads/<%= item.foto %>" target="_blank">
-                                            <img src="/uploads/<%= item.foto %>" class="img-preview">
-                                        </a>
-                                    <% } else { %>
-                                        <small>-</small>
-                                    <% } %>
-                                </td>
-                                <td><%= new Date(item.waktu).toLocaleString('id-ID') %></td>
-                                <td><%= item.nama %></td>
-                                <td><span class="badge bg-<%= item.status %>"><%= item.status %></span></td>
-                                <td>
-                                    <strong>Kegiatan:</strong> <%= item.kegiatan %><br>
-                                    <% if (item.lokasi) { %>
-                                        <small>📍 <a href="https://maps.google.com/?q=<%= item.lokasi %>" target="_blank" style="color: #007bff;">Buka di Google Maps</a></small>
-                                    <% } else { %>
-                                        <small>📍 Lokasi tidak dideteksi</small>
-                                    <% } %>
-                                </td>
-                                <td>
-                                    <form action="/hapus/<%= item.id %>" method="POST" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
-                                        <button type="submit" class="btn btn-danger">Hapus</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        <% }) %>
-                    <% } else { %>
-                        <tr><td colspan="6" style="text-align: center;">Belum ada data absensi.</td></tr>
-                    <% } %>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <script>
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(position => {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
-                document.getElementById('lokasi').value = `${lat},${lon}`;
-            });
-        }
-    </script>
 </body>
 </html>
