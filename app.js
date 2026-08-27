@@ -29,5 +29,10 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// WAJIB: Export app untuk Vercel Serverless
+// Tambahkan di baris sebelum module.exports = app;
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).send(`<h1>Detail Error Server:</h1><pre>${err.stack}</pre>`);
+});
+
 module.exports = app;
