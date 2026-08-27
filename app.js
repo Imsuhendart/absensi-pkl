@@ -11,40 +11,38 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.resolve(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-// --- ROUTE APLIKASI ---
-
-// Route Utama (Membaca status login dari URL query ?user=Nama)
+// State Login Sederhana (Menggunakan Query URL untuk Vercel Serverless)
 app.get('/', (req, res) => {
   const username = req.query.user || null;
-  const user = username ? { username: username, role: 'Siswa' } : null;
+  const user = username ? { username: username, role: 'Siswa PKL' } : null;
 
   res.render('index', { 
-    title: 'Absensi PKL',
+    title: 'Aplikasi Absensi PKL',
     user: user,
-    data: [] 
+    absensiList: [] // Data riwayat absensi sementara
   });
 });
 
-// Route Halaman Form Login
 app.get('/login', (req, res) => {
   res.render('login', { 
-    title: 'Login Absensi PKL',
+    title: 'Login - Absensi PKL',
     error: null 
   });
 });
 
-// Proses Submit Form Login
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
   if (username && password) {
-    // Redirect ke halaman utama membawa nama user
+    // Berhasil login, arahkan ke halaman utama dengan membawa parameter user
     res.redirect(`/?user=${encodeURIComponent(username)}`);
   } else {
-    res.render('login', { title: 'Login Absensi PKL', error: 'Username dan Password wajib diisi!' });
+    res.render('login', { 
+      title: 'Login - Absensi PKL', 
+      error: 'Username dan Password wajib diisi!' 
+    });
   }
 });
 
-// Route Logout
 app.get('/logout', (req, res) => {
   res.redirect('/');
 });

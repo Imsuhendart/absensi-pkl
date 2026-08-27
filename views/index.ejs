@@ -4,63 +4,68 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= typeof title !== 'undefined' ? title : 'Absensi PKL' %></title>
-  <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      margin: 20px; 
-      background-color: #f4f4f9; 
-    }
-    .header { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      background: #fff; 
-      padding: 15px 20px; 
-      border-radius: 8px; 
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-    }
-    .container { 
-      margin-top: 20px; 
-      background: #fff; 
-      padding: 20px; 
-      border-radius: 8px; 
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-    }
-    .btn { 
-      display: inline-block; 
-      padding: 8px 15px; 
-      background-color: #007bff; 
-      color: white; 
-      text-decoration: none; 
-      border-radius: 4px; 
-      border: none; 
-      cursor: pointer; 
-    }
-    .btn-danger { 
-      background-color: #dc3545; 
-    }
-  </style>
+  <!-- Bootstrap 5 CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome untuk Ikon -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-light">
 
-  <div class="header">
-    <h2>Aplikasi Absensi PKL</h2>
-    <div>
-      <% if (typeof user !== 'undefined' && user !== null) { %>
-        <span>Login sebagai: <strong><%= user.username %></strong> (<%= user.role %>)</span>
-        <a href="/logout" class="btn btn-danger" style="margin-left: 10px;">Logout</a>
-      <% } else { %>
-        <a href="/login" class="btn">Login</a>
-      <% } %>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="#"><i class="fa-solid fa-clipboard-user me-2"></i>Absensi PKL</a>
+      <div>
+        <% if (typeof user !== 'undefined' && user !== null) { %>
+          <span class="text-white me-3"><i class="fa-solid fa-user-circle me-1"></i><%= user.username %> (<%= user.role %>)</span>
+          <a href="/logout" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a>
+        <% } else { %>
+          <a href="/login" class="btn btn-light btn-sm text-primary fw-bold"><i class="fa-solid fa-right-to-bracket me-1"></i>Login</a>
+        <% } %>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Konten Utama -->
+  <div class="container my-5">
+    <div class="p-5 mb-4 bg-white rounded-4 shadow-sm border">
+      <div class="container-fluid py-2">
+        <h1 class="display-6 fw-bold text-dark">Selamat Datang di Sistem Absensi PKL</h1>
+        <p class="col-md-8 fs-5 text-secondary">Kelola data kehadiran harian dan unduh laporan rekapitulasi dengan mudah dan cepat.</p>
+        <hr class="my-4">
+        
+        <% if (typeof user !== 'undefined' && user !== null) { %>
+          <div class="alert alert-success" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i>Anda berhasil masuk sebagai <strong><%= user.username %></strong>. Silakan catat kehadiran Anda hari ini.
+          </div>
+          <button class="btn btn-success btn-lg shadow-sm"><i class="fa-solid fa-check-to-slot me-2"></i>Absen Sekarang</button>
+        <% } else { %>
+          <div class="alert alert-warning" role="alert">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>Silakan <strong>Login</strong> terlebih dahulu untuk melakukan absensi.
+          </div>
+          <a href="/login" class="btn btn-primary btn-lg shadow-sm"><i class="fa-solid fa-right-to-bracket me-2"></i>Masuk ke Akun</a>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Tombol Unduh Laporan -->
+    <div class="card shadow-sm border-0">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <h5 class="card-title fw-bold text-dark mb-1"><i class="fa-solid fa-file-excel text-success me-2"></i>Laporan Presensi</h5>
+          <p class="card-text text-muted mb-0">Unduh rekap data absensi peserta PKL dalam format Excel (CSV).</p>
+        </div>
+        <a href="#" class="btn btn-outline-success"><i class="fa-solid fa-download me-1"></i>Unduh CSV</a>
+      </div>
     </div>
   </div>
 
-  <div class="container">
-    <h3>Selamat Datang di Sistem Absensi PKL</h3>
-    <p>Gunakan menu yang tersedia untuk mencatat dan mengunduh laporan presensi.</p>
-    <br>
-    <a href="#" class="btn">📊 Unduh Excel (CSV)</a>
-  </div>
+  <!-- Footer -->
+  <footer class="text-center text-muted py-4">
+    <small>&copy; 2026 Aplikasi Absensi PKL. All rights reserved.</small>
+  </footer>
 
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
