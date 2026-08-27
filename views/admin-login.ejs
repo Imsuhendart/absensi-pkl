@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Admin - SMKN 1 Sukaluyu</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #312e81 100%);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .login-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-4">
+        <div class="login-card p-4 p-md-5">
+          <div class="text-center mb-4">
+            <div class="bg-dark text-white rounded-circle p-3 d-inline-block shadow mb-2" style="width: 70px; height: 70px;">
+              <i class="fa-solid fa-user-shield fa-2x mt-1"></i>
+            </div>
+            <h4 class="fw-bold text-dark">LOGIN ADMIN</h4>
+            <p class="text-muted small">Panel Kontrol SMKN 1 Sukaluyu</p>
+          </div>
+
+          <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-danger py-2 text-center small"><%= error %></div>
+          <% } %>
+
+          <form action="/admin/login" method="POST">
+            <div class="mb-3">
+              <label class="form-label fw-bold small">Username Admin</label>
+              <input type="text" name="username" class="form-control py-2" placeholder="Masukkan username admin" required>
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-bold small">Password Admin</label>
+              <input type="password" name="password" class="form-control py-2" placeholder="Masukkan password admin" required>
+            </div>
+            <button type="submit" class="btn btn-dark w-100 py-3 fw-bold shadow">
+              <i class="fa-solid fa-right-to-bracket me-2"></i> MASUK ADMIN
+            </button>
+          </form>
+
+          <div class="text-center mt-3">
+            <a href="/login" class="text-decoration-none small text-muted"><i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Login Siswa</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
