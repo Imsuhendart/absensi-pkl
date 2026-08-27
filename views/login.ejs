@@ -1,39 +1,38 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <title><%= title %></title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #eef2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 320px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        button { background: #007bff; color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .error { color: red; font-size: 13px; margin-bottom: 10px; }
-        .info { background: #e7f3fe; padding: 8px; font-size: 12px; border-radius: 4px; margin-top: 15px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'Login' %></title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    .login-card { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .form-group input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+    .btn { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .error { color: red; font-size: 14px; margin-bottom: 10px; }
+  </style>
 </head>
 <body>
-    <div class="login-card">
-        <h2>Login Presensi PKL</h2>
-        <% if (error) { %><div class="error"><%= error %></div><% } %>
-        <form action="/login" method="POST">
-            <div class="form-group">
-                <label>Username:</label>
-                <input type="text" name="username" required>
-            </div>
-            <div class="form-group">
-                <label>Password:</label>
-                <input type="password" name="password" required>
-            </div>
-            <button type="submit">Masuk</button>
-        </form>
-        <div class="info">
-            <strong>Akun Bawaan:</strong><br>
-            • Admin/Pembimbing: <code>admin</code> / <code>admin123</code><br>
-            • Siswa: <code>siswa</code> / <code>siswa123</code>
-        </div>
-    </div>
+
+  <div class="login-card">
+    <h2>Login Absensi PKL</h2>
+    <% if (error) { %>
+      <div class="error"><%= error %></div>
+    <% } %>
+    <form action="/login" method="POST">
+      <div class="form-group">
+        <label>Username:</label>
+        <input type="text" name="username" required>
+      </div>
+      <div class="form-group">
+        <label>Password:</label>
+        <input type="password" name="password" required>
+      </div>
+      <button type="submit" class="btn">Masuk</button>
+    </form>
+  </div>
+
 </body>
 </html>
