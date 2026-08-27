@@ -8,7 +8,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Set View Engine (EJS) dan tentukan path absolute ke folder views
-app.set('views', path.join(__dirname, 'views'));
+// Tentukan lokasi folder views menggunakan path.resolve
+app.set('views', path.resolve(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 // --- ROUTE APLIKASI ---
