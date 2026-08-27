@@ -5,35 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= typeof title !== 'undefined' ? title : 'Absensi PKL' %></title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      padding: 0;
-      background-color: #f4f4f9;
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 20px; 
+      background-color: #f4f4f9; 
     }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #fff;
-      padding: 15px 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    .header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      background: #fff; 
+      padding: 15px 20px; 
+      border-radius: 8px; 
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
     }
-    .container {
-      margin-top: 20px;
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    .container { 
+      margin-top: 20px; 
+      background: #fff; 
+      padding: 20px; 
+      border-radius: 8px; 
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
     }
-    .btn {
-      display: inline-block;
-      padding: 8px 15px;
-      background-color: #007bff;
-      color: white;
-      text-decoration: none;
-      border-radius: 4px;
+    .btn { 
+      display: inline-block; 
+      padding: 8px 15px; 
+      background-color: #007bff; 
+      color: white; 
+      text-decoration: none; 
+      border-radius: 4px; 
+      border: none; 
+      cursor: pointer; 
+    }
+    .btn-danger { 
+      background-color: #dc3545; 
     }
   </style>
 </head>
@@ -42,8 +46,9 @@
   <div class="header">
     <h2>Aplikasi Absensi PKL</h2>
     <div>
-      <% if (typeof user !== 'undefined' && user) { %>
+      <% if (typeof user !== 'undefined' && user !== null) { %>
         <span>Login sebagai: <strong><%= user.username %></strong> (<%= user.role %>)</span>
+        <a href="/logout" class="btn btn-danger" style="margin-left: 10px;">Logout</a>
       <% } else { %>
         <a href="/login" class="btn">Login</a>
       <% } %>
@@ -53,7 +58,6 @@
   <div class="container">
     <h3>Selamat Datang di Sistem Absensi PKL</h3>
     <p>Gunakan menu yang tersedia untuk mencatat dan mengunduh laporan presensi.</p>
-    
     <br>
     <a href="#" class="btn">📊 Unduh Excel (CSV)</a>
   </div>
