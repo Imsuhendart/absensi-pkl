@@ -38,15 +38,19 @@ async function initDB() {
         password TEXT NOT NULL,
         nama_lengkap TEXT NOT NULL,
         kelas TEXT NOT NULL,
-        jurusan TEXT NOT NULL
+        jurusan TEXT NOT NULL,
+        foto TEXT
       )
     `);
+
+    // Tambah kolom foto jika tabel sudah terlanjur dibuat tanpa kolom foto
+    await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS foto TEXT`);
 
     const checkUser = await client.query('SELECT COUNT(*) FROM users');
     if (parseInt(checkUser.rows[0].count) === 0) {
       await client.query(`
-        INSERT INTO users (username, password, nama_lengkap, kelas, jurusan) 
-        VALUES ('ahmadfauzi', '123456', 'Ahmad Fauzi', 'XI TKJT 1', 'Teknik Komputer & Jaringan')
+        INSERT INTO users (username, password, nama_lengkap, kelas, jurusan, foto) 
+        VALUES ('ahmadfauzi', '123456', 'Ahmad Fauzi', 'XI TKJT 1', 'Teknik Komputer & Jaringan', 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png')
       `);
     }
 
@@ -88,21 +92,18 @@ app.get('/', async (req, res) => {
   });
 });
 
-// Halaman Login (Satu untuk semua)
+// Halaman Login
 app.get('/login', (req, res) => {
   res.render('login', { title: 'Login - Absensi PKL', error: null });
 });
 
-// Proses Login Bersama (Deteksi Admin atau Siswa)
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
-  // 1. Cek apakah yang login adalah Admin khusus
   if (username === 'admin' && password === 'admin123') {
     return res.redirect('/admin?auth=true');
   }
 
-  // 2. Jika bukan admin, cek ke database untuk akun siswa
   try {
     const client = await pool.connect();
     const result = await client.query(
@@ -128,7 +129,7 @@ app.post('/login', async (req, res) => {
 // ==================== PANEL ADMIN ====================
 app.get('/admin', async (req, res) => {
   if (req.query.auth !== 'true') {
-    return res.redirect('/login'); // Jika belum login admin, lempar balik ke login umum
+    return res.redirect('/login');
   }
 
   try {
@@ -144,20 +145,20 @@ app.get('/admin', async (req, res) => {
   }
 });
 
-// Proses Tambah Siswa oleh Admin
+// Proses Tambah Siswa oleh Admin (Termasuk Foto)
 app.post('/admin/tambah-siswa', async (req, res) => {
-  const { username, password, nama_lengkap, kelas, jurusan } = req.body;
+  const { username, password, nama_lengkap, kelas, jurusan, foto } = req.body;
   try {
     const client = await pool.connect();
     await client.query(
-      'INSERT INTO users (username, password, nama_lengkap, kelas, jurusan) VALUES ($1, $2, $3, $4, $5)',
-      [username, password, nama_lengkap, kelas, jurusan]
+      'INSERT INTO users (username, password, nama_lengkap, kelas, jurusan, foto) VALUES ($1, $2, $3, $4, $5, $6)',
+      [username, password, nama_lengkap, kelas, jurusan, foto || null]
     );
     const result = await client.query('SELECT * FROM users ORDER BY id DESC');
     const usersList = result.rows;
     client.release();
 
-    res.render('admin', { usersList, success: 'Akun siswa berhasil ditambahkan!' });
+    res.render('admin', { usersList, success: 'Akun dan foto siswa berhasil ditambahkan!' });
   } catch (err) {
     console.error('Tambah siswa error:', err);
     res.status(500).send(`Gagal menambahkan siswa: ${err.message}`);

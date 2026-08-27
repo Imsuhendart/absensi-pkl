@@ -9,6 +9,7 @@
   <style>
     body { background-color: #f4f7fc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     .card-custom { border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); background: white; }
+    .avatar-img { width: 45px; height: 45px; object-fit: cover; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
   </style>
 </head>
 <body>
@@ -16,8 +17,8 @@
   <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h2 class="fw-bold text-dark"><i class="fa-solid fa-user-shield text-primary me-2"></i> Panel Admin Siswa PKL</h2>
-        <p class="text-muted mb-0">SMKN 1 Sukaluyu - Kelola Akun dan Data Siswa</p>
+        <h2 class="fw-bold text-dark"><i class="fa-solid fa-user-shield text-primary me-2"></i> Panel Admin SMKN 1 Sukaluyu</h2>
+        <p class="text-muted mb-0">Kelola Akun, Data, dan Foto Siswa PKL</p>
       </div>
       <div>
         <a href="/admin/logout" class="btn btn-danger fw-bold"><i class="fa-solid fa-right-from-bracket me-1"></i> Logout Admin</a>
@@ -29,10 +30,10 @@
     <% } %>
 
     <div class="row">
-      <!-- Form Tambah Siswa -->
+      <!-- Form Tambah Siswa & Foto -->
       <div class="col-md-4 mb-4">
         <div class="card card-custom p-4">
-          <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-user-plus me-2"></i> Tambah Siswa Baru</h5>
+          <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-user-plus me-2"></i> Tambah Siswa & Foto</h5>
           <form action="/admin/tambah-siswa" method="POST">
             <div class="mb-3">
               <label class="form-label fw-bold small">Username / NIS</label>
@@ -54,6 +55,11 @@
               <label class="form-label fw-bold small">Jurusan</label>
               <input type="text" name="jurusan" class="form-control" placeholder="Contoh: Teknik Komputer & Jaringan" required>
             </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold small">URL / Link Foto Siswa</label>
+              <input type="text" name="foto" class="form-control" placeholder="https://... (link foto profil)">
+              <small class="text-muted" style="font-size: 11px;">Kosongkan jika ingin menggunakan foto default.</small>
+            </div>
             <button type="submit" class="btn btn-primary w-100 fw-bold py-2 shadow-sm">
               <i class="fa-solid fa-save me-1"></i> Simpan Siswa
             </button>
@@ -61,7 +67,7 @@
         </div>
       </div>
 
-      <!-- Daftar Siswa yang Terdaftar -->
+      <!-- Daftar Siswa Terdaftar -->
       <div class="col-md-8">
         <div class="card card-custom p-4">
           <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-users me-2"></i> Daftar Akun Siswa PKL Terdaftar</h5>
@@ -69,7 +75,7 @@
             <table class="table table-hover align-middle">
               <thead class="table-dark">
                 <tr>
-                  <th>No</th>
+                  <th>Foto</th>
                   <th>Username / NIS</th>
                   <th>Nama Lengkap</th>
                   <th>Kelas & Jurusan</th>
@@ -78,9 +84,11 @@
               </thead>
               <tbody>
                 <% if (usersList && usersList.length > 0) { %>
-                  <% usersList.forEach((user, index) => { %>
+                  <% usersList.forEach((user) => { %>
                     <tr>
-                      <td><%= index + 1 %></td>
+                      <td>
+                        <img src="<%= user.foto || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' %>" alt="Foto" class="avatar-img">
+                      </td>
                       <td class="fw-bold text-primary"><%= user.username %></td>
                       <td><%= user.nama_lengkap %></td>
                       <td><small class="text-muted"><%= user.kelas %> - <%= user.jurusan %></small></td>
