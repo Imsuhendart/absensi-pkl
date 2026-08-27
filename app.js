@@ -16,12 +16,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.resolve(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-// Fungsi inisialisasi tabel otomatis (Absensi & Users/Siswa)
+// Inisialisasi Database
 async function initDB() {
   try {
     const client = await pool.connect();
     
-    // Tabel Absensi
     await client.query(`
       CREATE TABLE IF NOT EXISTS absensi (
         id SERIAL PRIMARY KEY,
@@ -32,7 +31,6 @@ async function initDB() {
       )
     `);
 
-    // Tabel Users (Akun Siswa yang diatur oleh Admin)
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -44,7 +42,7 @@ async function initDB() {
       )
     `);
 
-    // Masukkan akun default contoh jika tabel users masih kosong (Bisa ditambah oleh Admin nantinya)
+    // Tambah akun default jika kosong
     const checkUser = await client.query('SELECT COUNT(*) FROM users');
     if (parseInt(checkUser.rows[0].count) === 0) {
       await client.query(`
@@ -60,7 +58,7 @@ async function initDB() {
 }
 initDB();
 
-// Halaman Utama / Dashboard
+// Halaman Dashboard Siswa (Menyesuaikan data profil dari tabel users)
 app.get('/', async (req, res) => {
   const username = req.query.user || null;
   let currentUser = null;
@@ -96,7 +94,6 @@ app.get('/login', (req, res) => {
   res.render('login', { title: 'Login - Absensi PKL', error: null });
 });
 
-// Proses Login (Mengecek akun yang terdaftar di Database)
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
@@ -121,6 +118,60 @@ app.post('/login', async (req, res) => {
     res.render('login', { title: 'Login - Absensi PKL', error: 'Terjadi kesalahan pada server.' });
   }
 });
+
+// ==================== PANEL ADMIN ROUTES ====================
+// Halaman Panel Admin untuk Mengatur Akun Siswa
+app.get('/admin', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const result = await client.query('SELECT * FROM users ORDER BY id DESC');
+    const usersList = result.rows;
+    client.release();
+
+    res.render('admin', { usersList, success: null });
+  } catch (err) {
+    console.error('Admin panel error:', err);
+    res.status(500).send('Gagal membuka panel admin');
+  }
+});
+
+// Proses Tambah Siswa oleh Admin
+app.post('/admin/tambah-siswa', async (req, res) => {
+  const { username, password, nama_lengkap, kelas, jurusan } = req.body;
+  try {
+    const client = await pool.connect();
+    await client.query(
+      'INSERT INTO users (username, password, nama_lengkap, kelas, jurusan) VALUES ($1, $2, $3, $4, $5)',
+      [username, password, nama_lengkap, kelas, jurusan]
+    );
+    const result = await client.query('SELECT * FROM users ORDER BY id DESC');
+    const usersList = result.rows;
+    client.release();
+
+    res.render('admin', { usersList, success: 'Akun siswa berhasil ditambahkan!' });
+  } catch (err) {
+    console.error('Tambah siswa error:', err);
+    res.status(500).send(`Gagal menambahkan siswa: ${err.message}`);
+  }
+});
+
+// Proses Hapus Siswa oleh Admin
+app.post('/admin/hapus-siswa', async (req, res) => {
+  const { id } = req.body;
+  try {
+    const client = await pool.connect();
+    await client.query('DELETE FROM users WHERE id = $1', [id]);
+    const result = await client.query('SELECT * FROM users ORDER BY id DESC');
+    const usersList = result.rows;
+    client.release();
+
+    res.render('admin', { usersList, success: 'Akun siswa berhasil dihapus!' });
+  } catch (err) {
+    console.error('Hapus siswa error:', err);
+    res.status(500).send('Gagal menghapus siswa');
+  }
+});
+// ============================================================
 
 app.get('/logout', (req, res) => {
   res.redirect('/');
