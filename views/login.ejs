@@ -8,24 +8,67 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
   <style>
     body {
-      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      background: linear-gradient(135deg, #090d16 0%, #1e3a8a 100%);
       height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
+    
+    /* Efek 3D Card */
     .login-card {
       background: rgba(255, 255, 255, 0.95);
-      border-radius: 20px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      transform: translateY(0);
-      transition: transform 0.3s ease;
+      border-radius: 24px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 
+                  0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+      transform: perspective(1000px) rotateX(2deg) rotateY(0deg);
+      transition: all 0.4s ease;
     }
     .login-card:hover {
-      transform: translateY(-5px);
+      transform: perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(-5px);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Efek 3D Logo Sekolah */
+    .logo-container-3d {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 15px auto;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #ffffff, #d6d9e0);
+      box-shadow: 8px 8px 16px #bebebe, 
+                  -8px -8px 16px #ffffff,
+                  inset 0 4px 6px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      animation: floatLogo 3s ease-in-out infinite;
+    }
+    .logo-container-3d img {
+      width: 70px;
+      height: 70px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+    }
+
+    @keyframes floatLogo {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .form-control, .input-group-text {
+      border-radius: 12px;
+    }
+    .btn-3d {
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+      transition: all 0.2s;
+    }
+    .btn-3d:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
     }
   </style>
 </head>
@@ -35,24 +78,27 @@
     <div class="row justify-content-center">
       <div class="col-md-5">
         <div class="login-card p-4 p-md-5">
-          <div class="text-center mb-4">
-            <div class="bg-primary text-white rounded-circle p-3 d-inline-block shadow-lg mb-3" style="width: 75px; height: 75px;">
-              <i class="fa-solid fa-graduation-cap fa-2x mt-1"></i>
+          
+          <!-- Logo 3D SMKN 1 Sukaluyu -->
+          <div class="text-center">
+            <div class="logo-container-3d">
+              <!-- Ganti src dengan link logo resmi SMKN 1 Sukaluyu atau file lokal -->
+              <img src="https://i.ibb.co.com/84w6Hh4/logo-smkn1sukaluyu.png" alt="Logo SMKN 1 Sukaluyu" onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png';">
             </div>
-            <h3 class="fw-bold text-dark">SMKN 1 SUKALUYU</h3>
-            <p class="text-muted small">Portal Absensi Praktik Kerja Lapangan (PKL)</p>
+            <h4 class="fw-bold text-dark mb-1">SMKN 1 SUKALUYU</h4>
+            <p class="text-muted small mb-4">Portal Absensi PKL (Akun diatur oleh Admin)</p>
           </div>
 
-          <% if (error) { %>
-            <div class="alert alert-danger py-2 text-center small"><%= error %></div>
+          <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-danger py-2 text-center small rounded-3 shadow-sm"><%= error %></div>
           <% } %>
 
           <form action="/login" method="POST">
             <div class="mb-3">
-              <label class="form-label fw-bold text-secondary small">USERNAME / NIS</label>
+              <label class="form-label fw-bold text-secondary small">USERNAME / NIS SISWA</label>
               <div class="input-group">
                 <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-user text-primary"></i></span>
-                <input type="text" name="username" class="form-control border-start-0" placeholder="Masukkan username Anda" required>
+                <input type="text" name="username" class="form-control border-start-0 py-2" placeholder="Masukkan username dari admin" required>
               </div>
             </div>
 
@@ -60,17 +106,17 @@
               <label class="form-label fw-bold text-secondary small">PASSWORD</label>
               <div class="input-group">
                 <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-lock text-primary"></i></span>
-                <input type="password" name="password" class="form-control border-start-0" placeholder="Masukkan password" required>
+                <input type="password" name="password" class="form-control border-start-0 py-2" placeholder="Masukkan password" required>
               </div>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow rounded-pill">
+            <button type="submit" class="btn btn-primary btn-3d w-100 py-3 fw-bold">
               <i class="fa-solid fa-right-to-bracket me-2"></i> MASUK APLIKASI
             </button>
           </form>
 
-          <div class="text-center mt-4">
-            <small class="text-muted">&copy; 2026 IT Support - SMKN 1 Sukaluyu</small>
+          <div class="text-center mt-4 border-top pt-3">
+            <small class="text-muted">Hubungi Admin/Guru Pembimbing jika belum memiliki akun.</small>
           </div>
         </div>
       </div>
