@@ -42,7 +42,6 @@ async function initDB() {
       )
     `);
 
-    // Tambah akun default jika kosong
     const checkUser = await client.query('SELECT COUNT(*) FROM users');
     if (parseInt(checkUser.rows[0].count) === 0) {
       await client.query(`
@@ -58,7 +57,7 @@ async function initDB() {
 }
 initDB();
 
-// Halaman Dashboard Siswa (Menyesuaikan data profil dari tabel users)
+// Halaman Dashboard Siswa
 app.get('/', async (req, res) => {
   const username = req.query.user || null;
   let currentUser = null;
@@ -89,14 +88,21 @@ app.get('/', async (req, res) => {
   });
 });
 
-// Halaman Login
+// Halaman Login (Satu untuk semua)
 app.get('/login', (req, res) => {
   res.render('login', { title: 'Login - Absensi PKL', error: null });
 });
 
+// Proses Login Bersama (Deteksi Admin atau Siswa)
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
+  // 1. Cek apakah yang login adalah Admin khusus
+  if (username === 'admin' && password === 'admin123') {
+    return res.redirect('/admin?auth=true');
+  }
+
+  // 2. Jika bukan admin, cek ke database untuk akun siswa
   try {
     const client = await pool.connect();
     const result = await client.query(
@@ -110,7 +116,7 @@ app.post('/login', async (req, res) => {
     } else {
       res.render('login', { 
         title: 'Login - Absensi PKL', 
-        error: 'Username atau Password salah, atau akun belum didaftarkan oleh Admin!' 
+        error: 'Username atau Password salah!' 
       });
     }
   } catch (err) {
@@ -119,9 +125,12 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// ==================== PANEL ADMIN ROUTES ====================
-// Halaman Panel Admin untuk Mengatur Akun Siswa
+// ==================== PANEL ADMIN ====================
 app.get('/admin', async (req, res) => {
+  if (req.query.auth !== 'true') {
+    return res.redirect('/login'); // Jika belum login admin, lempar balik ke login umum
+  }
+
   try {
     const client = await pool.connect();
     const result = await client.query('SELECT * FROM users ORDER BY id DESC');
@@ -170,6 +179,10 @@ app.post('/admin/hapus-siswa', async (req, res) => {
     console.error('Hapus siswa error:', err);
     res.status(500).send('Gagal menghapus siswa');
   }
+});
+
+app.get('/admin/logout', (req, res) => {
+  res.redirect('/login');
 });
 // ============================================================
 
