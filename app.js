@@ -14,11 +14,11 @@ app.set('view engine', 'ejs');
 
 // --- ROUTE APLIKASI ---
 app.get('/', (req, res) => {
-  res.render('index');
+  res.render('index', { title: 'Absensi PKL' });
 });
 
 app.get('/login', (req, res) => {
-  res.render('login');
+  res.render('login', { title: 'Login Absensi PKL' });
 });
 
 // Jalankan server lokal (hanya aktif di komputer/lokal)
