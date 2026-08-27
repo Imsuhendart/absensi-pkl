@@ -16,7 +16,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.resolve(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-// Inisialisasi Database
+// Inisialisasi Database (Absensi, Users, & Perusahaan)
 async function initDB() {
   try {
     const client = await pool.connect();
@@ -43,8 +43,23 @@ async function initDB() {
       )
     `);
 
-    // Tambah kolom foto jika tabel sudah terlanjur dibuat tanpa kolom foto
-    await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS foto TEXT`);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS perusahaan (
+        id SERIAL PRIMARY KEY,
+        nama_perusahaan TEXT NOT NULL,
+        alamat_perusahaan TEXT NOT NULL,
+        pembimbing TEXT NOT NULL
+      )
+    `);
+
+    // Masukkan data perusahaan default jika masih kosong
+    const checkPerusahaan = await client.query('SELECT COUNT(*) FROM perusahaan');
+    if (parseInt(checkPerusahaan.rows[0].count) === 0) {
+      await client.query(`
+        INSERT INTO perusahaan (nama_perusahaan, alamat_perusahaan, pembimbing) 
+        VALUES ('PT. Teknologi Nusantara Sukaluyu', 'Jl. Raya Sukaluyu No. 45, Cianjur', 'Bapak Budi Santoso, S.Kom')
+      `);
+    }
 
     const checkUser = await client.query('SELECT COUNT(*) FROM users');
     if (parseInt(checkUser.rows[0].count) === 0) {
@@ -66,6 +81,7 @@ app.get('/', async (req, res) => {
   const username = req.query.user || null;
   let currentUser = null;
   let absensiList = [];
+  let perusahaanData = null;
 
   try {
     const client = await pool.connect();
@@ -75,6 +91,11 @@ app.get('/', async (req, res) => {
       if (userResult.rows.length > 0) {
         currentUser = userResult.rows[0];
       }
+    }
+
+    const persResult = await client.query('SELECT * FROM perusahaan LIMIT 1');
+    if (persResult.rows.length > 0) {
+      perusahaanData = persResult.rows[0];
     }
 
     const result = await client.query('SELECT * FROM absensi ORDER BY created_at DESC');
@@ -88,7 +109,8 @@ app.get('/', async (req, res) => {
   res.render('index', { 
     title: 'Absensi PKL - SMKN 1 Sukaluyu',
     user: currentUser,
-    absensiList: absensiList 
+    absensiList: absensiList,
+    perusahaan: perusahaanData 
   });
 });
 
@@ -134,18 +156,57 @@ app.get('/admin', async (req, res) => {
 
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT * FROM users ORDER BY id DESC');
-    const usersList = result.rows;
+    const usersResult = await client.query('SELECT * FROM users ORDER BY id DESC');
+    const persResult = await client.query('SELECT * FROM perusahaan LIMIT 1');
+    
+    const usersList = usersResult.rows;
+    const perusahaan = persResult.rows.length > 0 ? persResult.rows[0] : null;
+    
     client.release();
 
-    res.render('admin', { usersList, success: null });
+    res.render('admin', { usersList, perusahaan, success: null });
   } catch (err) {
     console.error('Admin panel error:', err);
     res.status(500).send('Gagal membuka panel admin');
   }
 });
 
-// Proses Tambah Siswa oleh Admin (Termasuk Foto)
+// Update Data Perusahaan oleh Admin
+app.post('/admin/update-perusahaan', async (req, res) => {
+  const { nama_perusahaan, alamat_perusahaan, pembimbing } = req.body;
+  try {
+    const client = await pool.connect();
+    
+    // Cek apakah data perusahaan sudah ada
+    const check = await client.query('SELECT * FROM perusahaan LIMIT 1');
+    if (check.rows.length > 0) {
+      await client.query(
+        'UPDATE perusahaan SET nama_perusahaan = $1, alamat_perusahaan = $2, pembimbing = $3 WHERE id = $4',
+        [nama_perusahaan, alamat_perusahaan, pembimbing, check.rows.id]
+      );
+    } else {
+      await client.query(
+        'INSERT INTO perusahaan (nama_perusahaan, alamat_perusahaan, pembimbing) VALUES ($1, $2, $3)',
+        [nama_perusahaan, alamat_perusahaan, pembimbing]
+      );
+    }
+
+    const usersResult = await client.query('SELECT * FROM users ORDER BY id DESC');
+    const persResult = await client.query('SELECT * FROM perusahaan LIMIT 1');
+    client.release();
+
+    res.render('admin', { 
+      usersList: usersResult.rows, 
+      perusahaan: persResult.rows, 
+      success: 'Data perusahaan berhasil diperbarui!' 
+    });
+  } catch (err) {
+    console.error('Update perusahaan error:', err);
+    res.status(500).send('Gagal memperbarui data perusahaan');
+  }
+});
+
+// Tambah Siswa oleh Admin
 app.post('/admin/tambah-siswa', async (req, res) => {
   const { username, password, nama_lengkap, kelas, jurusan, foto } = req.body;
   try {
@@ -154,28 +215,36 @@ app.post('/admin/tambah-siswa', async (req, res) => {
       'INSERT INTO users (username, password, nama_lengkap, kelas, jurusan, foto) VALUES ($1, $2, $3, $4, $5, $6)',
       [username, password, nama_lengkap, kelas, jurusan, foto || null]
     );
-    const result = await client.query('SELECT * FROM users ORDER BY id DESC');
-    const usersList = result.rows;
+    const usersResult = await client.query('SELECT * FROM users ORDER BY id DESC');
+    const persResult = await client.query('SELECT * FROM perusahaan LIMIT 1');
     client.release();
 
-    res.render('admin', { usersList, success: 'Akun dan foto siswa berhasil ditambahkan!' });
+    res.render('admin', { 
+      usersList: usersResult.rows, 
+      perusahaan: persResult.rows.length > 0 ? persResult.rows : null, 
+      success: 'Akun dan foto siswa berhasil ditambahkan!' 
+    });
   } catch (err) {
     console.error('Tambah siswa error:', err);
     res.status(500).send(`Gagal menambahkan siswa: ${err.message}`);
   }
 });
 
-// Proses Hapus Siswa oleh Admin
+// Hapus Siswa oleh Admin
 app.post('/admin/hapus-siswa', async (req, res) => {
   const { id } = req.body;
   try {
     const client = await pool.connect();
     await client.query('DELETE FROM users WHERE id = $1', [id]);
-    const result = await client.query('SELECT * FROM users ORDER BY id DESC');
-    const usersList = result.rows;
+    const usersResult = await client.query('SELECT * FROM users ORDER BY id DESC');
+    const persResult = await client.query('SELECT * FROM perusahaan LIMIT 1');
     client.release();
 
-    res.render('admin', { usersList, success: 'Akun siswa berhasil dihapus!' });
+    res.render('admin', { 
+      usersList: usersResult.rows, 
+      perusahaan: persResult.rows.length > 0 ? persResult.rows : null, 
+      success: 'Akun siswa berhasil dihapus!' 
+    });
   } catch (err) {
     console.error('Hapus siswa error:', err);
     res.status(500).send('Gagal menghapus siswa');
